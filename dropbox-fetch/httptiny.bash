@@ -1,14 +1,30 @@
 #!/bin/bash
 
-TIME=`perl httptiny.pl "http://bit.ly/MPSI3_16-17";`;
+DIR=$(dirname $0)
+DIR="$DIR/"
 
-sort filelist/filelist_${TIME}.txt > sorted_${TIME}.txt
-mv sorted_${TIME}.txt filelist/filelist_${TIME}.txt
+mkdir -p ${DIR}filelist
+mkdir -p ${DIR}diff
 
-if [ -s lasttime ]
+source ${DIR}config.bash
+
+TIME=`perl ${DIR}httptiny.pl "$URL" "${DIR}";`
+
+sort "${DIR}filelist/filelist_${TIME}.txt" > "${DIR}sorted_${TIME}.txt"
+mv "${DIR}sorted_${TIME}.txt" "${DIR}filelist/filelist_${TIME}.txt"
+
+LAST=`cat ${DIR}lasttime`
+if [ "$LAST" != '' ]
 then
-    LAST=`cat lasttime`
-    diff filelist/filelist_${LAST}.txt filelist/filelist_${TIME}.txt > diff/diff_${TIME}.txt
+    diff "${DIR}filelist/filelist_${LAST}.txt" "${DIR}filelist/filelist_${TIME}.txt" > "${DIR}diff/diff_${TIME}.txt"
 fi
 
-echo $TIME > lasttime
+echo $TIME > "${DIR}lasttime"
+
+DIFF=`cat "${DIR}diff/diff_${TIME}.txt"`
+
+if [ "$DIFF" != '' ]
+then
+    perl ${DIR}mailchimp.pl "$API" "${DIR}diff/diff_${TIME}.txt" "$SUBJECT"
+fi
+

@@ -7,10 +7,12 @@ use utf8;
 use HTTP::Tiny;
 
 my $homepage = shift;
-if (not defined $homepage) {die "No homepage given."}
+if (not defined $homepage) {die "No homepage given.";}
+
+my $dir = shift;
 
 my $time = time;
-my $output = "filelist/filelist_$time.txt" }
+my $output = "${dir}filelist/filelist_$time.txt";
 
 open(my $filelist, ">:encoding(utf8)", $output) or die "Can not open file for write : $!";
 rec_ls($filelist, "/", $homepage);
