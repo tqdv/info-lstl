@@ -41,7 +41,7 @@ sub rec_ls {
     my $files;
     my $dirs;
 
-    while (<$fh>) { if ( /mod\.initialize_module.*"contents"[:\s]*\{"files"[:\s]*\[([^\[\]]*)\][,\s]*"folders"[:\s]*\[([^\[\]]*)\]/ ) {
+    while (<$fh>) { if ( /InitReact\.mountComponent.*"contents"[:\s]*\{"files"[:\s]*\[([^\[\]]*)\][,\s]*"folders"[:\s]*\[([^\[\]]*)\]/ ) {
 
         $files = $1;
         $dirs = $2;

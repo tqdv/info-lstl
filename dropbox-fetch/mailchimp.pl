@@ -22,7 +22,7 @@ if($answer =~ /"id"[:\s]*"([^"]*)"[^"]*"name"[:\s]*"MPSI 3"/s) {
     $list = $1;
 }
 
-$answer = `curl --silent --request POST --url 'https://${serv}.api.mailchimp.com/3.0/campaigns' --user 'anystring:${api}' --data '{"recipients": {"list_id": "${list}"}, "type": "regular", "settings": {"subject_line": "${subject}", "from_name": "SimplyCurious", "reply_to": "tiwa.qendov\@gmail.com"}}'`;
+$answer = `curl --silent --request POST --url 'https://${serv}.api.mailchimp.com/3.0/campaigns' --user 'anystring:${api}' --data '{"recipients": {"list_id": "${list}"}, "type": "regular", "settings": {"subject_line": "${subject}", "from_name": "SimplyCurious", "reply_to": "tilwa.qendov\@gmail.com"}}'`;
 
 if($answer =~ /"id"[:\s]*"([^"]*)"/) {
     $campaign = $1;

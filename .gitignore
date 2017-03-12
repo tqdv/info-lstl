@@ -3,3 +3,6 @@
 
 diff_*
 filelist_*
+
+lasttime
+dropbox-fetch/config.bash
