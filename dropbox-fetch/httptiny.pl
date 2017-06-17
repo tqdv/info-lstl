@@ -6,6 +6,21 @@ use utf8;
 
 use HTTP::Tiny;
 
+# WIP to replace the current way it handles it
+if (False) {
+my ($homepage, $dir) = @ARGV;
+
+if (not defined $homepage) {die "No homepage given.";}
+
+my $time = time;
+
+if ((substr($dir, -1)) == '/') {
+	chop $dir;
+}
+
+}
+
+
 my $homepage = shift;
 if (not defined $homepage) {die "No homepage given.";}
 
