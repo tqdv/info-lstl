@@ -291,7 +291,7 @@ sub add_from {
 		foreach my $elem (@{ $unittree{$from}->{'above'} }) {
 			my $upcomp = cmp_vals($unitval, $unittree{$elem}->{'value'});
 
-			if ($elem eq '1') {
+			if ($elem eq '1') { # Otherwise it just goes up
 				$ishere = 1;
 				next;
 			}
