@@ -19,9 +19,17 @@ Something that compares line rank range between two files
 
 Creates a DOT file (for graphviz) from a specific input
 
+### Notes
+
+- The program writes to a file named `file.gv`.
+
 ### Input
 - first line is all the baseunits seperated by whitespace
 - following lines are <unitsymbol> followed by their expression in baseunits (e.g. m.s-2)
+
+### TODO
+
+- Better debug output
 
 ## poem
 

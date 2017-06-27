@@ -2,8 +2,10 @@
 
 use strict;
 use warnings;
+my $d = 0;
+my $inputfile;
 
-my ($inputfile) = @ARGV;
+($inputfile, $d) = @ARGV;
 
 open my $fh, '<', $inputfile or die "Could not open $inputfile : $!";
 
@@ -14,7 +16,7 @@ my $line;
 if (not defined($line = <$fh>)) { die "No input"; }
 my @baseunits = split ' ', $line; # splitting on ' ' <=> on /\s+/
 
-{
+if ($d) {
 print "DEBUG baseunits: @baseunits\n";
 #<STDIN>;
 }
@@ -38,7 +40,7 @@ $unittree{"1"} = {
 	level => 0
 };
 
-{
+if ($d) {
 print "DEBUG Added baseunits\n";
 #<STDIN>;
 print_ut();
@@ -60,7 +62,7 @@ while (defined(my $line = <$fh>)) {
 		}
 	}
 
-	{
+	if ($d) {
 	print "Adding $unitsymb:\n";
 	foreach my $key (keys %unitval) {
 		print "\t$key: $unitval{$key}\n";
@@ -84,7 +86,7 @@ while (defined(my $line = <$fh>)) {
 			level => $level
 	};
 	
-	{
+	if ($d) {
 	print "DEBUG Added $unitsymb:\n";
 	my @keys = keys %unitval; 
 	print "\t@keys\n";
@@ -96,20 +98,57 @@ while (defined(my $line = <$fh>)) {
 	# Go through tree starting from each base component
 	my $seen = {};
 	foreach my $elem (keys %unitval) {
-		{
+		if ($d) {
 		print "Adding $unitsymb from $elem\n";
 		#<STDIN>;
 		}
 		add_from($elem . $unitval{$elem}, \%unitval, $unitsymb, $seen);
-		{
+		if ($d) {
 		print "Added $unitsymb from $elem\n";
 		print_ut();
 		#<STDIN>;
 		}
 	}
 }
+close $fh;
 
+if ($d) {
+print "FINAL PRINT!!!!!!\n";
+print "-----------------\n";
+print "-----------------\n";
+print "-----------------\n";
 print_ut();
+}
+
+open $fh, '>', "file.gv";
+print $fh "digraph G {\n";
+foreach my $key (keys %unittree) {
+	my $nkey = ($key =~ s/-/_neg_/r);
+	if ($nkey =~ m/_alt/) {
+		my $ori = ($key =~ s/_alt//r);
+		$nkey =~ s/_alt//;
+
+		my %seen;
+		map { my $e = (s/_alt//r); $seen{$e} = 1 } @{ $unittree{$ori}->{above} };
+
+		foreach my $elem (@{ $unittree{$key}->{above} }) {
+			my $nelem = ($elem =~ s/_alt//r);
+			if (not exists $seen{$nelem}) {
+				$nelem = ($nelem =~ s/-/_neg_/r);
+				print $fh "$nkey -> $nelem;\n";
+			}
+		}
+
+	} else {
+		foreach my $elem (@{ $unittree{$key}->{above} }) {
+			my $nelem = (($elem =~ s/-/_neg_/r )=~ s/_alt//r);
+			print $fh "$nkey -> $nelem;\n";
+		}
+	}
+}
+print $fh "}";
+
+close $fh;
 
 sub print_ut {
 	foreach my $key (keys %unittree) {
@@ -262,10 +301,10 @@ sub add_from {
 	$seen->{$from} = 1;
 
 	my $comparison = cmp_vals($unitval, $unittree{$from}->{'value'});
-	{
+	if ($d) {
 	print "DEBUG comparison: $unitsymb $comparison $from\n";
-	print_u($unitsymb);
-	print_u($from);
+	#print_u($unitsymb);
+	#print_u($from);
 	#<STDIN>;
 	}
 
@@ -277,46 +316,54 @@ sub add_from {
 		warn "Error, checking against greater unit";
 
 	} elsif ($comparison == 1) {
-		my $ishere = 0;
+		my $isabove = 0;
 		my @fabove; # The new above for $from
 		my @uabove; # The new above for $unitsymb
 
-		{
+		if ($d) {
 		print "DEBUG going through @{ $unittree{$from}->{'above'} }\n";
 		#<STDIN>;
 		}
 
-		(!@{ $unittree{$from}->{'above'} }) && ($ishere = 1);
+		#(!@{ $unittree{$from}->{'above'} }) && ($ishere = 1);
 
 		foreach my $elem (@{ $unittree{$from}->{'above'} }) {
 			my $upcomp = cmp_vals($unitval, $unittree{$elem}->{'value'});
 
 			if ($elem eq '1') { # Otherwise it just goes up
-				$ishere = 1;
+				push @fabove, "1";
+				#$ishere = 1;
 				next;
 			}
 			if ($upcomp == 1 || $upcomp == 0) {
+				$isabove = 1;
 				push @fabove, $elem;
 				add_from($elem, $unitval, $unitsymb, $seen);
 			}
 			if ($upcomp == -1) {
-				$ishere = 1;
+				#$ishere = 1;
 				push @uabove, $elem;
 			}
 			if ($upcomp == 63) {
-				$ishere = 1;
+				#$ishere = 1;
 				push @fabove, $elem;
 			}
 		}
 
+		(! $isabove) && (push @fabove, $unitsymb);
 		# If there are things above $unitsymb, then it is above $from
-		($ishere) && (push @fabove, $unitsymb);
+		#($ishere) && (push @fabove, $unitsymb);
 
 		@fabove = uniq(@fabove);
 		$unittree{$from}->{above} = \@fabove;
 		push @uabove, @{ $unittree{$unitsymb}->{above} }; 
 		@uabove = uniq(@uabove);
 		$unittree{$unitsymb}->{above} = \@uabove;
+
+		if ($d) {
+		print "fabove: @fabove\n";
+		print "uabove: @uabove\n";
+		}
 	}
 }
 
