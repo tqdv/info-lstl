@@ -27,6 +27,10 @@ Creates a DOT file (for graphviz) from a specific input
 - first line is all the baseunits seperated by whitespace
 - following lines are <unitsymbol> followed by their expression in baseunits (e.g. m.s-2)
 
+### Example
+
+![SI Units](http://i.imgur.com/5ZzgpEm.png)
+
 ### TODO
 
 - Better debug output
