@@ -2,10 +2,13 @@
 
 use strict;
 use warnings;
+
+# Debug levels
 my $d = 0;
+my $dd = 0;
 my $inputfile;
 
-($inputfile, $d) = @ARGV;
+($inputfile, $d, $dd) = @ARGV;
 
 open my $fh, '<', $inputfile or die "Could not open $inputfile : $!";
 
@@ -18,7 +21,7 @@ my @baseunits = split ' ', $line; # splitting on ' ' <=> on /\s+/
 
 if ($d) {
 print "DEBUG baseunits: @baseunits\n";
-#<STDIN>;
+($dd) && <STDIN>;
 }
 
 # Add baseunits to unittree
@@ -42,9 +45,9 @@ $unittree{"1"} = {
 
 if ($d) {
 print "DEBUG Added baseunits\n";
-#<STDIN>;
+($dd) && <STDIN>;
 print_ut();
-#<STDIN>;
+($dd) && <STDIN>;
 }
 
 }
@@ -67,7 +70,7 @@ while (defined(my $line = <$fh>)) {
 	foreach my $key (keys %unitval) {
 		print "\t$key: $unitval{$key}\n";
 	}
-	#<STDIN>;
+	($dd) && <STDIN>;
 	}
 
 	# Create non-existent baseunits powers
@@ -91,7 +94,7 @@ while (defined(my $line = <$fh>)) {
 	my @keys = keys %unitval; 
 	print "\t@keys\n";
 	print "\tlevel: $level\n";
-	#<STDIN>;
+	($dd) && <STDIN>;
 	}
 
 	# Fill the aboves
@@ -100,13 +103,13 @@ while (defined(my $line = <$fh>)) {
 	foreach my $elem (keys %unitval) {
 		if ($d) {
 		print "Adding $unitsymb from $elem\n";
-		#<STDIN>;
+		($dd) && <STDIN>;
 		}
 		add_from($elem . $unitval{$elem}, \%unitval, $unitsymb, $seen);
 		if ($d) {
 		print "Added $unitsymb from $elem\n";
 		print_ut();
-		#<STDIN>;
+		($dd) && <STDIN>;
 		}
 	}
 }
@@ -117,32 +120,45 @@ print "FINAL PRINT!!!!!!\n";
 print "-----------------\n";
 print "-----------------\n";
 print "-----------------\n";
+($dd) && <STDIN>;
 print_ut();
 }
 
+# Writing output
+# Removing _alt and replacing - with _neg_ because graphviz
+# doesn't like it
 open $fh, '>', "file.gv";
 print $fh "digraph G {\n";
 foreach my $key (keys %unittree) {
+	# $n* is used for printing, $* is the internal representation
 	my $nkey = ($key =~ s/-/_neg_/r);
 	if ($nkey =~ m/_alt/) {
+		# Compare with the alternate version to prevent duplicates
 		my $ori = ($key =~ s/_alt//r);
 		$nkey =~ s/_alt//;
 
+		# %seen holds the internal representations
 		my %seen;
 		map { my $e = (s/_alt//r); $seen{$e} = 1 } @{ $unittree{$ori}->{above} };
 
 		foreach my $elem (@{ $unittree{$key}->{above} }) {
 			my $nelem = ($elem =~ s/_alt//r);
 			if (not exists $seen{$nelem}) {
+				$seen{$nelem} = 1;
 				$nelem = ($nelem =~ s/-/_neg_/r);
 				print $fh "$nkey -> $nelem;\n";
 			}
 		}
 
 	} else {
+		# %seen holds the external representation
+		my %seen;
 		foreach my $elem (@{ $unittree{$key}->{above} }) {
 			my $nelem = (($elem =~ s/-/_neg_/r )=~ s/_alt//r);
-			print $fh "$nkey -> $nelem;\n";
+			if (not exists $seen{$nelem}) {
+				$seen{$nelem} = 1;
+				print $fh "$nkey -> $nelem;\n";
+			}
 		}
 	}
 }
@@ -240,9 +256,10 @@ sub add_baseunit {
 	$expon == 0 && return; # 1 is already added
 	if (exists $unittree{$unit . $expon}) { return; }
 	
-	#{
-	#print "DEBUG Added from $unit$expon...\n";
-	#}
+	if ($d) {
+	print "DEBUG Added from $unit$expon...\n";
+	($dd) && <STDIN>;
+	}
 	
 	my $oriexpon = $expon;
 	my $sign = ($expon > 0 ? "+" : "-");
@@ -259,37 +276,41 @@ sub add_baseunit {
 			level => int $expon
 		};
 
-		#{
-		#print_u($extrunit);
-		#}
+		if ($d) {
+		print_u($extrunit);
+		($dd) && <STDIN>;
+		}
 
 		$expon = $expon - (int "${sign}1");
 		$extrunit = ( $expon == 0 ? 1 : $unit . $expon);
-		#{
-		#print "Trying to add $extrunit\n";
-		#}
+		if ($d) {
+		print "Trying to add $extrunit\n";
+		($dd) && <STDIN>;
+		}
 	}
 
-	#{
-	#print "...to $unit$expon\n";
-	##<STDIN>;
-	#}
+	if ($d) {
+	print "...to $unit$expon\n";
+	($dd) && <STDIN>;
+	}
 
 	# Positive decreasing, add above for the last one
 	if ($oriexpon > 0 ) {
-		#{
-		#print "extrunit: $extrunit\n";
-		#print "expon: $expon\n";
-		#}
+		if ($d) {
+		print "extrunit: $extrunit\n";
+		print "expon: $expon\n";
+		($dd) && <STDIN>;
+		}
 		push @{ $unittree{$extrunit}->{'above'} }, $unit . ($expon +1);
 		pop @{ $unittree{$unit . $oriexpon}->{'above'} };
 	}
 
-	#{
-	#foreach my $i (($expon + 1)..$oriexpon) {
-	#	print_u($unit . $i);
-	#}
-	#}
+	if ($d) {
+	foreach my $i (($expon + 1)..$oriexpon) {
+		print_u($unit . $i);
+	}
+	($dd) && <STDIN>;
+	}
 }
 
 sub add_from {
@@ -303,9 +324,9 @@ sub add_from {
 	my $comparison = cmp_vals($unitval, $unittree{$from}->{'value'});
 	if ($d) {
 	print "DEBUG comparison: $unitsymb $comparison $from\n";
-	#print_u($unitsymb);
-	#print_u($from);
-	#<STDIN>;
+	print_u($unitsymb);
+	print_u($from);
+	($dd) && <STDIN>;
 	}
 
 	if ($comparison == 0) {
@@ -322,17 +343,14 @@ sub add_from {
 
 		if ($d) {
 		print "DEBUG going through @{ $unittree{$from}->{'above'} }\n";
-		#<STDIN>;
+		($dd) && <STDIN>;
 		}
-
-		#(!@{ $unittree{$from}->{'above'} }) && ($ishere = 1);
 
 		foreach my $elem (@{ $unittree{$from}->{'above'} }) {
 			my $upcomp = cmp_vals($unitval, $unittree{$elem}->{'value'});
 
 			if ($elem eq '1') { # Otherwise it just goes up
 				push @fabove, "1";
-				#$ishere = 1;
 				next;
 			}
 			if ($upcomp == 1 || $upcomp == 0) {
@@ -341,28 +359,27 @@ sub add_from {
 				add_from($elem, $unitval, $unitsymb, $seen);
 			}
 			if ($upcomp == -1) {
-				#$ishere = 1;
-				push @uabove, $elem;
+				if (not exists $seen->{$upcomp}) {
+					$seen->{$upcomp} = 1;
+					push @uabove, $elem;
+				}
 			}
 			if ($upcomp == 63) {
-				#$ishere = 1;
 				push @fabove, $elem;
 			}
 		}
 
 		(! $isabove) && (push @fabove, $unitsymb);
-		# If there are things above $unitsymb, then it is above $from
-		#($ishere) && (push @fabove, $unitsymb);
 
-		@fabove = uniq(@fabove);
+		# Replacing into the tree
 		$unittree{$from}->{above} = \@fabove;
 		push @uabove, @{ $unittree{$unitsymb}->{above} }; 
-		@uabove = uniq(@uabove);
 		$unittree{$unitsymb}->{above} = \@uabove;
 
 		if ($d) {
 		print "fabove: @fabove\n";
 		print "uabove: @uabove\n";
+		($dd) && <STDIN>;
 		}
 	}
 }
