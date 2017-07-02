@@ -6,7 +6,7 @@
 }
 
 .wrapper > * { /* prevent inheritance */
-	font-family: initial;
+	font-family: sans-serif;
 }
 
 h1 {
