@@ -1,9 +1,6 @@
 from numpy import log as ln
 from fractions import Fraction
 
-
-
-
 # Exercice 1
 
 def f(x) :
@@ -11,6 +8,7 @@ def f(x) :
 
 def g(x) :
     return x + 1 
+
 
 # Exercice 2
 
@@ -34,6 +32,7 @@ def max_3(a, b, c) :
 
 def max_4(a, b, c, d) :
     return max(max(a,b), max(c,d))
+
 
 # Exercice 3
 
@@ -77,7 +76,7 @@ def Machin(y) :
     e += 1
     return e
 
-# DO NOT RUN
+# This is an infinite loop if x < y
 def Bidule(y) :
     x = 1
     e = 0
