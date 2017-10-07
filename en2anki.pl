@@ -1,30 +1,43 @@
 use strict;
 use warnings;
 
+sub trim {
+	my ($str) = @_;
+	$str =~ s/^\*\s+|\s+$//g;
+	return $str;
+}
+
+sub escape {
+	my ($str) = @_;
+	$str =~ s/</&lt;/g;
+	$str =~ s/>/&gt;/g;
+	return $str;
+}
+
+
 my $current = <>;
 while (defined $current) {
 	if ($current =~ /^\*([^:]*)$/) {
-		$current =~ s/^\*\s+|\s+$//g;
+		$current = escape(trim($current));
 		print "$current % -\n";
 		$current = <>;
 	} elsif ($current =~ /^\*\s*([^:]*):(.*)$/) {
-		my $fst = $1;
-		my $snd = $2;
+		my $fst = escape(trim($1));
+		my $snd = escape(trim($2));
 
 		if ((my $next = <>) =~ /^\*/) {
-			print "$fst\%$snd\n";
+			# Single line key-value pair
+			print "$fst % $snd\n";
 			$current = <>;
 		} else {
-			$snd =~ s/"/''/g;
-			print "$fst\% \"$snd\n";
+			print "$fst % $snd<br>";
 			chomp $next;
 			print $next;
 			while (($next = <>) !~ /^\*/) {
-				$next =~ s/"/''/g;
 				chomp $next;
-				print "\n", $next;
+				print "<br>", $next;
 			}
-			print "\"\n";
+			print "\n";
 			$current = $next;
 		}
 	} else {
