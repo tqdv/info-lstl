@@ -17,6 +17,7 @@ Something that compares line rank range between two files
 
 ## siu.pl
 
+**Droppped**  
 Creates a DOT file (for graphviz) from a specific input
 
 ### Notes

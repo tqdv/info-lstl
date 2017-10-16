@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# Dropped
+
 use strict;
 use warnings;
 
