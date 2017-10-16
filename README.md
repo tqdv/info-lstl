@@ -36,14 +36,13 @@ Creates a DOT file (for graphviz) from a specific input
 
 - Better debug output
 
-## poem
+## en2anki.pl
 
-Formats the poem in monospace and dumps whatever is after the poem delimiter.
+Converts a file formatted as following into a `%` separated html Anki csv input.
 
-### Usage
-place `poem.css` in `/css/` (or modify the code to put it wherever you want)
-
-### Input
-- first line is title
-- second line is author
-- `---` is the poem end delimiter
+```markdown
+* key : value
+* key
+* key : multi-line
+value
+```

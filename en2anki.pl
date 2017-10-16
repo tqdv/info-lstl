@@ -7,10 +7,12 @@ sub trim {
 	return $str;
 }
 
+# Escapes html characters and the '%' delimiter
 sub escape {
 	my ($str) = @_;
 	$str =~ s/</&lt;/g;
 	$str =~ s/>/&gt;/g;
+	$str =~ s/%/&#37;/g;
 	return $str;
 }
 
@@ -21,7 +23,7 @@ while (defined $current) {
 		$current = escape(trim($current));
 		print "$current % -\n";
 		$current = <>;
-	} elsif ($current =~ /^\*\s*([^:]*):(.*)$/) {
+	} elsif ($current =~ /^\*([^:]*):(.*)$/) {
 		my $fst = escape(trim($1));
 		my $snd = escape(trim($2));
 
