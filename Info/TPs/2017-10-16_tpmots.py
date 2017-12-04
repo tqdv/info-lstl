@@ -136,41 +136,88 @@ def contientDoubleConsonne(m) :
     return False
 # unP(E, contientDoubleConsonne)
 
+# Retourne (bool, bool ? arbre modifié : arbre inchangé)
+def rotationD(a) :
+    (n, g, d) = a
+    if g == ARBRE_VIDE :
+        return (False, a)
+    (m, gm, dm) = g
+    a = (m, gm, (n, dm, d))
+    return (True, a)
+
+
+# Équilibre un arbre
+def equilibreArbre(a) :
+    def tree_to_vine(a) :
+        (n, g, d) = a
+        while g != ARBRE_VIDE :
+            (m, gm, gd) = g
+            a = (m, gm, (n, dm, d))
+            (n, g, d) = a
+        a = (n, g, tree_to_vine(d))
+        return a
+
+    pass
+
 # Garde que les mots présents dans M
-def sontDans(F, M) :
-    # Trie M et F dans l'ordre alphabétique
-    def CompM(x, y) :
-        return x < y
-    def CompF(x, y) :
-        (xm, _) = x
-        (ym, _) = y
+def sontDans(F, M, méthode="liste") :
+
+    if méthode == "liste" :
+        # Trie M dans l'ordre alphabétique
+        def CompM(x, y) :
+            return x < y
+
+        M = Tri(M, CompM)
+
+        def recherche(M, mot) :
+            if len(M) == 0 :
+                return False
+            elif len(M) == 1 :
+                return mot == M[0]
+            else :
+                milieu = len(M) // 2
+                if M[milieu] > mot :
+                    return recherche(M[:milieu], mot)
+                else :
+                    return recherche(M[milieu:], mot)
+
+
+    elif méthode == "arbre" :
+        # Crée un arbre binaire de recherche équilibré
+        def insérerA(A, elt) :
+            if A == ARBRE_VIDE :
+                return (elt, ARBRE_VIDE, ARBRE_VIDE)
+            # else :
+            (n, g, d) = A
+            if n == elt :
+                return A
+            elif n > elt :
+                return (n, insérerA(g, elt), d)
+            elif n < elt :
+                return (n, g, insérerA(d, elt))
+
+
+        A = ARBRE_VIDE
+        for i in M :
+            A = insérerA(A, i)
+
+
+        def recherche(A, mot) :
+            if A == ARBRE_VIDE :
+                return False
+            (n, g, d) = A
+            if n == mot :
+                return True
+            elif mot < n :
+                return recherche(g, mot)
+            elif n < mot :
+                return recherche(d, mot)
         
-        return xm < ym
-    M = Tri(M, CompM)
-    F = Tri(F, CompF)
-        
-    # Returne -1, 0, 1 quand m inférieur, égal, supérieur à mf
-    def compMF(m, f) :
-        (mf, ef) = f
-        if m < mf :
-            return -1
-        elif m == mf :
-            return 0
-        elif m > mf :
-            return 1
-    
+
     L = []
-    i = 0 ; j = 0
-    m = len(M) ; f = len(F)
-    while i < m and j < f :
-        cmp = compMF(M[i], F[j])
-        
-        if cmp == 0 :
-            L.append(F[j])
-            i += 1 ; j += 1
-        elif cmp == -1 :
-            i += 1
-        elif cmp == 1 :
-            j += 1
-    
+    for elt in F :
+        (mot, effectif) = elt
+        if recherche(M, mot) :
+            L.append(elt)
+
     return L

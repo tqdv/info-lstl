@@ -3,3 +3,7 @@
 
 diff_*
 filelist_*
+
+*.cmi
+*.cmx
+*.o

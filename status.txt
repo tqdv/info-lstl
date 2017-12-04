@@ -1,0 +1,2 @@
+- missing DSW in Info/TPs/2017-10-16_tpmots.py
+- Info/arbre.ml currently at miroirV
