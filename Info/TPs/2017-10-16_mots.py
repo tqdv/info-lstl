@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
 # ANALYSE FRÉQUENTIELLE DES MOTS DANS UN TEXTE
 
 # str.isalpha()
@@ -6,7 +8,7 @@
 def SéparerMots(Texte) :
     L = []
     cstr = ""
-    
+
     for i in Texte :
         if i.isalpha() :
             cstr += i.lower()
@@ -14,11 +16,12 @@ def SéparerMots(Texte) :
             if cstr != "" :
                 L.append(cstr)
                 cstr = ""
-    
+
     if cstr != "" :
         L.append(cstr)
-    
+
     return L
+
 
 # s.join(L) concatène la liste L des caractères séparée par s
 # Avec "rb", contenu est une liste de bytes
@@ -29,33 +32,33 @@ ARBRE_VIDE = None
 def Ajouter(mot, A) :
     if A == ARBRE_VIDE :
         return ((mot, 1), ARBRE_VIDE, ARBRE_VIDE)
-    
+
     else :
         ((n, e), g, d) = A
         if mot == n :
             return ((n, e +1), g, d)
-        
+
         elif mot < n :
             return ((n, e), Ajouter(mot, g), d)
-        
+
         elif mot > n :
             return ((n, e), g, Ajouter(mot, d))
 
 # Parcours un arbre dans le sens précisé
 def Parcourir(A, sens = "infixe") :
     L = []
-    
+
     if A == ARBRE_VIDE :
         pass
-    
+
     else :
         (n, g, d) = A
         if sens == "infixe" :
             L += Parcourir(g, sens) + [n] + Parcourir(d, sens)
-        
+
         elif sens == "préfixe" :
             L += [n] + Parcourir(g, sens) + Parcourir(d, sens)
-        
+
         elif sens == "postfixe" :
             L += Parcourir(g, sens) + Parcourir(d, sens) + [n]
 
@@ -67,11 +70,11 @@ def Tri(L, Comp) :
         return L
     else :
         S = []
-        
+
         m = len(L) // 2
         A = Tri(L[:m], Comp)
         B = Tri(L[m:], Comp)
-        
+
         i = 0; j = 0
         a = len(A) ; b = len(B)
         while i < a and j < b :
@@ -81,9 +84,9 @@ def Tri(L, Comp) :
             else :
                 S.append(B[j])
                 j += 1
-        
+
         S += A[i:] + B[j:]
-        
+
         return S
 
 # Compare les effectifs des mots
@@ -96,16 +99,16 @@ def Comp(a, b) :
 def AnalyserFichier(adresse) :
     with open(adresse, "rb") as fichier :
         contenu = fichier.read()
-    
+
     Texte = "".join([ chr(o) for o in contenu ])
     Mots = SéparerMots(Texte)
-    
+
     A = ARBRE_VIDE
     for m in Mots :
         A = Ajouter(m, A)
     L = Parcourir(A)
     L = Tri(L, Comp)
-    
+
     return L
 # E = AnalyserFichier(<adresse>)
 
@@ -113,11 +116,11 @@ def AnalyserFichier(adresse) :
 # F pour Fréquences des mots
 def unP(F, P) :
     L = []
-    
+
     for (m, e) in F :
         if P(m) :
             L.append((m, e))
-    
+
     return L
 
 def contientX(m) :
@@ -212,12 +215,15 @@ def sontDans(F, M, méthode="liste") :
                 return recherche(g, mot)
             elif n < mot :
                 return recherche(d, mot)
-        
 
     L = []
     for elt in F :
         (mot, effectif) = elt
-        if recherche(M, mot) :
+        if recherche(M, mot) :  # Peut-être pas M
             L.append(elt)
 
     return L
+
+# M = ['hi', 'o']
+# F = [("hi", 5),("lo", 12)]
+# t = sontDans(F, M)
