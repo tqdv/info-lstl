@@ -835,7 +835,7 @@ def CombiSuivant_1(T, n):
                 # Car on cherche toujours une valeur strictement supérieure
                 T[i] = -1
             else:
-                # WIP : Do you always look up ?
+                # On cherche toujours une valeur sup (donc -1 au lieu de 0)
                 j = cur_val + 1
                 while j < n and pos[j] is not None:
                     j += 1
