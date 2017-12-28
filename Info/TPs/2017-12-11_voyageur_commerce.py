@@ -778,62 +778,28 @@ def CombiSuivant_1(T, n):
     if not lt > 0:
         return None
 
-    # NB : pos peut être une liste de booléens (?)
-    # Vérifie que T soit une combinaison, et dans le cas contraire,
-    # modifie T pour qu'elle le soit. Construit aussi `pos`
-    # pos : Position de l'élément dans la combinaison
-    pos = [None] * n
-    i = 0
-    correct = True
-    while i < lt and correct:
-        if not T[i] < n:
-            return None
-        if T[i] < 0:
-            T[i] = 0
-            correct = False
-        elif pos[T[i]] is None:
-            pos[T[i]] = i
-            i += 1
-        else:
-            # 0 <= T[i] < n and pos[T[i]] != None
-            correct = False
-
-    if not correct:
-        # `i_erreur` indice de la première erreur
-        i_erreur = i
-        val_erreur = T[i_erreur]
-        trouve = False
-        while not i < 0 and not trouve:
-            # Cherche une valeur supérieure
-            cur_val = T[i]
-            j = cur_val + 1
-            if cur_val < 0:
-                j = 0
-
-            while j < n and pos[j] is not None:
-                j += 1
-            if j == n:
-                # Pas trouvé, on libère la place et on passe au suivant
-                # Sauf si c'est `i_erreur`, car sa valeur a déjà été rencontrée
-                # T/S : si le code casse, vérifier ici
-                if i != i_erreur:
-                    pos[cur_val] = None
-                i -= 1
+    # Vérifie si T est une combinaison, et dans le cas contraire, renvoie
+    # l'indice de la première erreur. Remplit aussi partiellement `pos`
+    def EstCombiErreur(T, pos):
+        lt = len(T)
+        n = len(pos)
+        i = 0
+        i_erreur = None
+        while i < lt and i_erreur is None:
+            if not T[i] < n:
+                i_erreur = i
+            elif T[i] < 0:
+                i_erreur = i
+            elif pos[T[i]] is not None:
+                i_erreur = i
             else:
-                nv_val = j
-                T[i] = j
-                pos[nv_val] = i
-                # T/S : je ne sais pas pourquoi
-                if not cur_val < 0 and i != i_erreur:
-                    pos[cur_val] = None
-                trouve = True
+                pos[T[i]] = i
+                i += 1
+        return i_erreur
 
-        if i < 0:
-            # Pas moyen d'avoir une combinaison correcte (?)
-            return None
-
+    def ComplSuiv(T, pos, i_correct):
         # Complète les éléments suivants de T (dans l'ordre croissant)
-        i += 1
+        i = i_correct + 1
         j = 0  # Parcoure `pos`, c'est la valeur de l'élément
         while i < lt:
             while j < n and pos[j] is not None:
@@ -848,48 +814,62 @@ def CombiSuivant_1(T, n):
             i += 1
         return T
 
-    # else:  # T est bien une combinaison
-    # i parcoure T (0..lt-1), premier élément à modifier
-    # j parcoure pos (0..n-1)
-    # Trouve le premier élément à modifier
-    i = lt - 1  # i-ème élément de la combinaison
-    trouve = False
-    while not i < 0 and not trouve:
-        # Cherche une élément de valeur supérieure
-        cur_val = T[i]
-        j = cur_val + 1
-        nv_val = None
-        while j < n and nv_val is None:
-            if pos[j] is None:
-                nv_val = j
+    # Prend `pos` et `i_erreur` initialisés par `EstCombiErreur` et renvoie
+    # la combinaison (strictement, car `i_erreur`) supérieure
+    def CombiSup(T, pos, i_erreur):
+        n = len(pos)
+        lt = len(T)
+        # On cherche à valider le début de la combinaison :
+        # on parcoure T de i_erreur vers 0
+        i = i_erreur
+        trouve = False
+        while i >= 0 and not trouve:
+            # Cherche une valeur supérieure
+            # L'élément considéré n'a pas de valeur dans `pos`
+            cur_val = T[i]
+            if cur_val >= n:
+                i -= 1
+                if i >= 0:
+                    pos[T[i]] = None
+            elif cur_val < -1:
+                # Car on cherche toujours une valeur strictement supérieure
+                T[i] = -1
             else:
-                j += 1
-        if j == n:  # or nv_val is None:
-            # On prend un autre, et on libère l'emplacement pris
-            pos[cur_val] = None
-            i -= 1
-        else:
-            # Il ne faut pas oublier de libérer l'ancien emplacement
-            T[i] = nv_val
-            pos[cur_val] = None
-            pos[nv_val] = i
-            trouve = True
-    if i < 0:
-        return None
+                # WIP : Do you always look up ?
+                j = cur_val + 1
+                while j < n and pos[j] is not None:
+                    j += 1
+                if j == n:
+                    # Pas trouvé, on passe au suivant
+                    i -= 1
+                    # L'élément considéré ne doit pas avoir de position !
+                    if i >= 0:
+                        pos[T[i]] = None
+                else:
+                    nv_val = j
+                    T[i] = j
+                    pos[nv_val] = i
+                    trouve = True
 
-    # Compléter les éléments suivants de T
-    i += 1
-    j = 0  # Parcoure pos, c'est la valeur de l'élément
-    while i < lt:
-        while j < n and pos[j] is not None:
-            j += 1
-        if j == n:
-            raise Exception("Impossible (?), cf code")
-        T[i] = j
-        # pos[j] = i
-        j += 1
-        i += 1
-    return T
+        if i < 0:
+            # Pas moyen d'avoir une combinaison correcte
+            return None
+        i_correct = i
+        return ComplSuiv(T, pos, i_correct)
+
+    # NB : `pos` peut être une liste de booléens (?)
+    # pos : Position de l'élément dans la combinaison
+    pos = [None] * n
+    # On cherche le suivant
+    T[-1] += 1
+    i_erreur = EstCombiErreur(T, pos)
+
+    print i_erreur  # DEBUG
+
+    if i_erreur is None:  # T (modifié est une combinaison)
+        return T
+    else:  # i_erreur == 1..n-1
+        return CombiSup(T, pos, i_erreur)
 
 
 def Glouton_2_3(X, Y):
