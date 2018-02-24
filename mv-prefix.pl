@@ -1,26 +1,31 @@
 #!/usr/bin/perl
 
-use strict;
-use warnings;
+=pod
 
-use Cwd;
+Version: 0.2.0
+
+Warning: Only use this as a handy shortcut.
+
+Sample use: mv-prefix.pl 'image_(.*).jpg' 'image_${m}.png'
+
+TODO: Add numbering?
+
+=cut
+
+use strict;
 use File::Copy;
 
-if (@ARGV < 1) {
+if (@ARGV < 2) {
 	die "Missing prefix as argument!\n";
 }
 
-my ($target) = @ARGV;
+my ($from, $to) = @ARGV;
 
-opendir my($dh), getcwd or die "Couldn't open pwd\n$!";
-my @files = readdir $dh;
-close $dh;
-
-for (@files) {
-	if (-f) {
-		if ($_ =~ qr/$target(.*)/) {
-			move $_, $target . '/' . $1;
-		}
+for (<*>) {
+	if ($_ =~ qr/$from/) {
+		my $m = $1;
+		my $target = $to =~ s/(\$\{\w+\})/$1/eegr;
+		move $_, $target;
 	}
 }
 

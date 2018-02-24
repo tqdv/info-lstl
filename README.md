@@ -46,3 +46,11 @@ Converts a file formatted as following into a `%` separated html Anki csv input.
 * key : multi-line
 value
 ```
+
+## mv-prefix.pl
+
+    Usage: mv-prefix.pl FROM TO
+    Example: mv-prefix.pl 'image_(.*).jpg' 'image_${m}.png'
+
+Moves files matching the `FROM` regex to the `TO` regex.  
+`${m}` stand for `$1` because I needed `$1`.
