@@ -54,3 +54,10 @@ value
 
 Moves files matching the `FROM` regex to the `TO` regex.  
 `${m}` stand for `$1` because I needed `$1`.
+
+## neonmob-dl.py
+
+   Usage: neonmob.dl [-f] [-v] [--link-only] URL...
+
+Downloads all images from a series, or a user's collected series to a
+(currently) fixed directory based on the slugs.
